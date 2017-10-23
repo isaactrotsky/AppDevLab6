@@ -12,6 +12,8 @@ class WeatherTableViewController: UITableViewController {
 
     let apiString10DayForecast = "https://api.wunderground.com/api/0ed26ba3a84094e3/forecast10day/q/CA/San_Luis_Obispo.json"
     
+    var txtForecast : TxtForecast?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -21,8 +23,23 @@ class WeatherTableViewController: UITableViewController {
         
         let task: URLSessionDataTask = session.dataTask(with: request)
         { (recievedData, response, error) -> Void in
-            
+            if let data = recievedData {
+                do {
+                    let decoder = JSONDecoder()
+                    let txtForecastService = try decoder.decode(TxtForecastService.self, from: data)
+                    
+                    self.txtForecast = txtForecastService.forecast.txt_forecast
+                    
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                }
+                catch {
+                    print("Exception on Decode: \(error)")
+                }
+            }
         }
+        task.resume()
 
         
     }
@@ -36,23 +53,27 @@ class WeatherTableViewController: UITableViewController {
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
+        return (txtForecast?.forecastDays.count) ?? 0
     }
 
-    /*
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "forecastDayCell", for: indexPath)
+        
+        let forecastDay = txtForecast!.forecastDays[indexPath.row]
 
         // Configure the cell...
+        cell.textLabel?.text = "\(String(describing: forecastDay.period))   \(forecastDay.title)"
+        cell.detailTextLabel?.text = "\(forecastDay.forecastText)"
 
         return cell
     }
-    */
+    
 
     /*
     // Override to support conditional editing of the table view.

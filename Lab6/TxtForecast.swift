@@ -13,11 +13,19 @@ struct TxtForecast : Codable {
     var forecastDays : [ForecastDay]
     
     private enum CodeingKeys: String, CodingKey {
-        case data
+        case date
         case forecastdays = "forecastday"
     }
     
     struct ForecastDay: Codable {
+        var title : String
+        var period : Int
+        var forecastText : String
         
+        private enum CodingKeys: String, CodingKey {
+            case title
+            case period
+            case forecastText = "fcttext"
+        }
     }
 }
